@@ -13,6 +13,8 @@ public class PaintWindow extends JFrame implements PaintObjectConstructorListene
     private JPanel toolPanel;
     private JPanel rPanel, gPanel, bPanel;
     private JSlider rSlider, bSlider, gSlider;
+    private JPanel thicknessPanel;
+    private JSlider thicknessSlider;
     private JPanel colorPanel;
     private JPanel controlPanel;
 	private JScrollPane canvasPane;
@@ -21,14 +23,23 @@ public class PaintWindow extends JFrame implements PaintObjectConstructorListene
     private ButtonGroup toolButtonGroup;
     
     private PaintObjectConstructor objectConstructor;    
+
+    private ChangeListener thicknessChangeListener = new ChangeListener() {
+
+        public void stateChanged(ChangeEvent changeEvent) {
+
+            objectConstructor.setThickness(thicknessSlider.getValue());
+
+        }
+    };
     
     private ChangeListener colorChangeListener = new ChangeListener() {
-        
+
         public void stateChanged(ChangeEvent changeEvent) {
-            
-	        objectConstructor.setColor(new Color(rSlider.getValue(), gSlider.getValue(), gSlider.getValue()));
+
+            objectConstructor.setColor(new Color(rSlider.getValue(), gSlider.getValue(), bSlider.getValue()));
             repaint();
-            
+
         }
     };
     
@@ -71,7 +82,7 @@ public class PaintWindow extends JFrame implements PaintObjectConstructorListene
         pencilButton.setSelected(true);
         eraserButton = new JRadioButton(actions.eraserAction);
         eraserButton.setOpaque(false);
-        lineButton = new JRadioButton("Line");
+        lineButton = new JRadioButton(actions.lineAction);
         lineButton.setOpaque(false);
         
         toolButtonGroup = new ButtonGroup();
@@ -109,6 +120,14 @@ public class PaintWindow extends JFrame implements PaintObjectConstructorListene
         bSlider.setOpaque(false);
         bSlider.addChangeListener(colorChangeListener);
         bPanel.add(bSlider);
+
+        thicknessPanel = new JPanel(new FlowLayout());
+        thicknessPanel.setOpaque(false);
+        thicknessPanel.add(new JLabel("Thickness"));
+        thicknessSlider = new JSlider(1, 40, 5);
+        thicknessSlider.setOpaque(false);
+        thicknessSlider.addChangeListener(thicknessChangeListener);
+        thicknessPanel.add(thicknessSlider);
         
         colorPanel = new JPanel();
         colorPanel.setOpaque(false);
@@ -116,6 +135,7 @@ public class PaintWindow extends JFrame implements PaintObjectConstructorListene
         colorPanel.add(rPanel);
         colorPanel.add(gPanel);
         colorPanel.add(bPanel);
+        colorPanel.add(thicknessPanel);
         currentColorComponent.setPreferredSize(new Dimension(100, 50));
         colorPanel.add(currentColorComponent);
                 
@@ -154,6 +174,7 @@ public class PaintWindow extends JFrame implements PaintObjectConstructorListene
         objectConstructor.setThickness(5);        
         canvas.addMouseListener(objectConstructor);
         canvas.addMouseMotionListener(objectConstructor);
+        thicknessSlider.setValue(5);
         
         pack();
         setVisible(true);

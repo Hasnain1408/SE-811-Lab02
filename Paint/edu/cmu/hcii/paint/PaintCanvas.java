@@ -15,9 +15,11 @@ public class PaintCanvas extends JPanel {
     public PaintCanvas(int initialWidth, int initialHeight) {
         
         setPreferredSize(new Dimension(initialWidth, initialHeight));
-        
+        this.initialWidth = initialWidth;
+        this.initialHeight = initialHeight;
+
         paintObjects = new Vector();
-        
+
         history = new Vector();
         
     }
@@ -31,8 +33,8 @@ public class PaintCanvas extends JPanel {
         
         Rectangle clipBounds = g.getClipBounds();
         g.setColor(Color.white);
-        g.fillRect((int)clipBounds.getX(), (int)clipBounds.getX(), 
-                    (int)clipBounds.getWidth(), (int)clipBounds.getHeight());
+        g.fillRect((int)clipBounds.getX(), (int)clipBounds.getY(), 
+            (int)clipBounds.getWidth(), (int)clipBounds.getHeight());
         
         Iterator paintObjectIterator = paintObjects.iterator();
         while(paintObjectIterator.hasNext())
@@ -72,10 +74,12 @@ public class PaintCanvas extends JPanel {
     }
     
     public void addPaintObject(PaintObject newObject) {
-        
         history.addElement(new Vector(paintObjects));
         paintObjects.addElement(newObject);
+        updatePreferredSizeFromObjects();
+        revalidate();
         repaint();
+        
         
     }
     
@@ -83,16 +87,43 @@ public class PaintCanvas extends JPanel {
         
         history.addElement(new Vector(paintObjects));
         paintObjects.removeAllElements();
+        setPreferredSize(new Dimension(initialWidth, initialHeight));
+        revalidate();
         repaint();
 
     }
 
     public void undo() { 
         
+        if(history.size() == 0) return;
         paintObjects = (Vector)history.lastElement();
-        history.removeElement(history.lastElement());
+        history.removeElementAt(history.size() - 1);
+        updatePreferredSizeFromObjects();
+        revalidate();
+        repaint();
         
     }
+
+    private void updatePreferredSizeFromObjects() {
+
+        int maxX = 0, maxY = 0;
+        for(Iterator it = paintObjects.iterator(); it.hasNext();) {
+            PaintObject obj = (PaintObject)it.next();
+            Rectangle r = obj.getBoundingBox();
+            if(r == null) continue;
+            int right = (int)(r.getX() + r.getWidth());
+            int bottom = (int)(r.getY() + r.getHeight());
+            if(right > maxX) maxX = right;
+            if(bottom > maxY) maxY = bottom;
+        }
+
+        int newWidth = Math.max(initialWidth, maxX + 10);
+        int newHeight = Math.max(initialHeight, maxY + 10);
+        setPreferredSize(new Dimension(newWidth, newHeight));
+
+    }
+
+    private int initialWidth, initialHeight;
 
 
 }
